@@ -43,7 +43,7 @@
 #define MAX_SENSOR_VALUE 1024
 
 // minimal distance, in meters, for an obstacle to be considered
-#define MIN_DISTANCE 1.0
+#define MIN_DISTANCE 0.75
 
 // minimal weight for the robot to turn
 #define WHEEL_WEIGHT_THRESHOLD 100
@@ -55,7 +55,7 @@ typedef struct {
 } SensorData;
 
 // enum to represent the state of the robot
-typedef enum { FORWARD, LEFT, RIGHT, BACKWARD, STOP} State;
+typedef enum { FORWARD, LEFT, RIGHT, STOP} State;
 
 // how much each sensor affects the direction of the robot
 static SensorData sensors[MAX_SENSOR_NUMBER] = {
@@ -104,7 +104,7 @@ int main() {
   wb_motor_set_velocity(left_wheel, 0.0);
   wb_motor_set_velocity(right_wheel, 0.0);
 
-  int j, led_number = 0, delay = 0, count = 0;
+  int j, led_number = 0, delay = 0;
   double speed[2] = {0.0, 0.0};
   double wheel_weight_total[2] = {0.0, 0.0};
   double distance, speed_modifier, sensor_value;
@@ -146,14 +146,14 @@ int main() {
     switch (state) {
       // when the robot is going forward, it will start turning in either direction when an obstacle is close enough
       case FORWARD:
-        if (count == 5){ //Make the robot stop if the Light Sensor returns 5 readings in the maximum in a row
+        if (wb_light_sensor_get_value(ls0) >= 750){ //Check if the light sensor's reading is above a threshold of 750W/m2
             speed[0] = wb_motor_get_velocity(left_wheel)*stop_factor;
             speed[1] = wb_motor_get_velocity(right_wheel)*stop_factor;
             state = STOP;
         } else if (wb_touch_sensor_get_value(ts0) == 1){ //Check for the Touch Sensor in the front of the robot
-          speed[0] = -MAX_SPEED;
-          speed[1] = -MAX_SPEED;
-          state = BACKWARD; // Prevent the robot from getting stuck in case the sensors can't detect the obstacle
+            speed[0] = 0.0;
+            speed[1] = 0.0;
+            state = RIGHT; // Prevent the robot from getting stuck in case the sensors can't detect the obstacle
         } else if (wheel_weight_total[0] > WHEEL_WEIGHT_THRESHOLD) {
           speed[0] = turning_factor * MAX_SPEED;
           speed[1] = -turning_factor * MAX_SPEED;
@@ -166,10 +166,6 @@ int main() {
           speed[0] = MAX_SPEED;
           speed[1] = MAX_SPEED;
         }
-        if (wb_light_sensor_get_value(ls0) == 1000) // Check if the light sensor is reading it's maximum value
-          count++; // increase counter
-        else
-          count = 0; //set counter to 0
         break;
       // when the robot has started turning, it will go on in the same direction until no more obstacle are in sight
       // this will prevent the robot from being caught in a loop going left, then right, then left, and so on.
@@ -184,7 +180,7 @@ int main() {
         }
         break;
       case RIGHT:
-        if (wheel_weight_total[0] > WHEEL_WEIGHT_THRESHOLD || wheel_weight_total[1] > WHEEL_WEIGHT_THRESHOLD) {
+        if ((wheel_weight_total[0] > WHEEL_WEIGHT_THRESHOLD || wheel_weight_total[1] > WHEEL_WEIGHT_THRESHOLD || wb_touch_sensor_get_value(ts0) == 1)) {
           speed[0] = -turning_factor * MAX_SPEED;
           speed[1] = turning_factor * MAX_SPEED;
         } else {
@@ -193,17 +189,8 @@ int main() {
           state = FORWARD;
         }
         break;
-      case BACKWARD:
-          if (wb_touch_sensor_get_value(ts0) == 0) // Stop going backwards if the Touch Sensor is not detecting anymore
-            state = RIGHT;
-          else {
-            speed[0] = -MAX_SPEED;
-            speed[1] = -MAX_SPEED;
-            state = BACKWARD;
-          }
-        break;
         case STOP:
-          if (wb_light_sensor_get_value(ls0) == 1000){ // Check if the light sensor is reading it's maximum value 
+          if (wb_light_sensor_get_value(ls0) >= 750){ //Check if the light sensor's reading is above a threshold of 750W/m2
             speed[0] = wb_motor_get_velocity(left_wheel)*stop_factor; // Gradually decreases velocity
             speed[1] = wb_motor_get_velocity(right_wheel)*stop_factor; // Gradually decreases velocit
             state = STOP;
