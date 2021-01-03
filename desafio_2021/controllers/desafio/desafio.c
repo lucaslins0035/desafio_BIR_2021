@@ -30,7 +30,7 @@
 #include <webots/motor.h>
 #include <webots/robot.h>
 
-// maximal speed allowed (5.24)
+// maximal speed allowed
 #define MAX_SPEED 9.24 
 
 // how many sensors are on the robot
@@ -146,14 +146,14 @@ int main() {
     switch (state) {
       // when the robot is going forward, it will start turning in either direction when an obstacle is close enough
       case FORWARD:
-        if (count == 5){
+        if (count == 5){ //Make the robot stop if the Light Sensor returns 5 readings in the maximum in a row
             speed[0] = wb_motor_get_velocity(left_wheel)*stop_factor;
             speed[1] = wb_motor_get_velocity(right_wheel)*stop_factor;
             state = STOP;
-        } else if (wb_touch_sensor_get_value(ts0) == 1){
+        } else if (wb_touch_sensor_get_value(ts0) == 1){ //Check for the Touch Sensor in the front of the robot
           speed[0] = -MAX_SPEED;
           speed[1] = -MAX_SPEED;
-          state = BACKWARD;
+          state = BACKWARD; // Prevent the robot from getting stuck in case the sensors can't detect the obstacle
         } else if (wheel_weight_total[0] > WHEEL_WEIGHT_THRESHOLD) {
           speed[0] = turning_factor * MAX_SPEED;
           speed[1] = -turning_factor * MAX_SPEED;
@@ -166,8 +166,10 @@ int main() {
           speed[0] = MAX_SPEED;
           speed[1] = MAX_SPEED;
         }
-        if (wb_light_sensor_get_value(ls0) == 1000)
-          count++;
+        if (wb_light_sensor_get_value(ls0) == 1000) // Check if the light sensor is reading it's maximum value
+          count++; // increase counter
+        else
+          count = 0; //set counter to 0
         break;
       // when the robot has started turning, it will go on in the same direction until no more obstacle are in sight
       // this will prevent the robot from being caught in a loop going left, then right, then left, and so on.
@@ -192,7 +194,7 @@ int main() {
         }
         break;
       case BACKWARD:
-          if (wb_touch_sensor_get_value(ts0) == 0)
+          if (wb_touch_sensor_get_value(ts0) == 0) // Stop going backwards if the Touch Sensor is not detecting anymore
             state = RIGHT;
           else {
             speed[0] = -MAX_SPEED;
@@ -201,13 +203,13 @@ int main() {
           }
         break;
         case STOP:
-          if (wb_light_sensor_get_value(ls0) == 1000){
-            speed[0] = wb_motor_get_velocity(left_wheel)*stop_factor;
-            speed[1] = wb_motor_get_velocity(right_wheel)*stop_factor;
+          if (wb_light_sensor_get_value(ls0) == 1000){ // Check if the light sensor is reading it's maximum value 
+            speed[0] = wb_motor_get_velocity(left_wheel)*stop_factor; // Gradually decreases velocity
+            speed[1] = wb_motor_get_velocity(right_wheel)*stop_factor; // Gradually decreases velocit
             state = STOP;
           }
           else 
-            state = FORWARD;
+            state = FORWARD; // Restart searching for a place near the lamp
         break;
     }
 

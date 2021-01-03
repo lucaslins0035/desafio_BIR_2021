@@ -11,8 +11,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.660595
-  orientation 0.4252749040717557 0.8139530735664833 0.39575453250523107 4.427030981654129
-  position -12.586299355900387 18.04072585966909 -1.6650682323725405
+  orientation 0.5197986338961639 0.7757172397082995 0.3578716868083004 4.667389272704988
+  position -8.841912346347108 6.403988676367867 -2.6798282286107136
 }
 TexturedBackground {
 }
@@ -131,10 +131,10 @@ DEF PIONEER_3DX Pioneer3dx {
   controller "desafio"
   extensionSlot [
     TouchSensor {
-      translation 0 0.15 -0.237
+      translation 0 0.15 -0.217
       name "ts0"
       boundingObject Box {
-        size 0.3 0.05 0.03
+        size 0.4 0.05 0.06
       }
     }
     LightSensor {
