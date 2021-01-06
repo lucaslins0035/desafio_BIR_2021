@@ -13,7 +13,7 @@
 ## The Robot
 
 The goal of the robot Pioneer 3-DX is to navigate the scenario avoiding obstacles in order to reach the zone 
-with a floor lamp and a stop sign. To perform this task the robot uses it's pre-installed 16 distance sensors and 2 additional devices: a light sensor and a touch sensor. The light sensor, installed on the top of the Pioneer 3-DX keeps track of the irradiance and sends a sign to the robot when it reads over 750 W/m2, which means it is close enough to the floor lamp. The touch sensor, installed in the front of the robot, prevents it from getting stuck in front of very thin objects like the start sign, witch the distance sensors may not be able to detect. See the distance sensors, the light sensor and the touch sensor installed in the picture below.
+with a floor lamp and a stop sign in 2 minutes. To perform this task the robot uses it's pre-installed 16 distance sensors and 2 additional devices: a light sensor and a touch sensor. The light sensor, installed on the top of the Pioneer 3-DX keeps track of the irradiance and sends a sign to the robot when it reads over 750 W/m2, which means it is close enough to the floor lamp. The touch sensor, installed in the front of the robot, prevents it from getting stuck in front of very thin objects like the start sign, witch the distance sensors may not be able to detect. See the distance sensors, the light sensor and the touch sensor installed in the picture below.
 
 ![The robot sensors](Docu/robot_sensors.png)
 
@@ -25,3 +25,8 @@ The controller file uses the data provided by all the sensors and make decisions
 
 The 16 distance sensors and the touch sensor provides the data that determines whether the robot should move forward or turn. The Pioneer 3-DX is a two-wheel robot and each distance sensor if defined in the controller file as containing a "weight value" for each wheel. This "weight value" is based on the position of the sensor on the robot's body and, therefore, how should it's reading affect the behavior of each wheel. This "weight value" contributes to the decision making if the sensor's reading is less than a minimum value, defined in the controller file. The final data used to determine the behavior of the robot is the sum of all the "weight values" for each wheel multiplied by a "speed_factor", which depends on the ratio of the sensor reading and the minimum distance value. The final result for the left and right wheel determines towards each direction the robot should turn. Once it starts turning, it will continue until no more obstacles are detected and it is able to move forward. If the robot hits an obstacle that could not be detected by the distance sensors, the touch sensor will detect it and make the robot turn right (the reason for choosing to turn right is totally arbitrary) and only move forward again when no more obstacles are detected by the distance sensors nor by the touch sensor.
 
+## The Results
+
+In order to test the controller algorithm, the simulation was run with different starting positions and orientations, all of them close to the start sign. The following table show 10 of those simulations. The robot was able to reach the end zone in all of them and exceeded the 2 minutes in only one occasion, which demonstrates that the controller is reliable and that the robot is able to complete it's mission.   
+
+![Results Table](Docu/table.png)
